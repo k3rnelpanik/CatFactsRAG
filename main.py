@@ -33,27 +33,32 @@ def retrieve(query, top_n=3):
     
     return similarities[:top_n]
 
-# Example query
-input_query = input("Ask a question about cats...\n")
-retrieved = retrieve(input_query)
+# Loopback
+st=1
+while(st==1):
+    # Example query
+    input_query = input("Ask a question about cats...\n")
+    retrieved = retrieve(input_query)
 
-print('Retrieved Facts:\n')
-print('----------------\n')
-for chunk, similarity in retrieved:
-    print(f'[{similarity:.2f}] {chunk}')
-instruction_prompt = "\n\nBased on the above facts and above facts alone, answer the following question:\n"
-{'\n'.join([chunk for chunk, similarity in retrieved])}
+    print('Retrieved Facts:\n')
+    print('----------------\n')
+    for chunk, similarity in retrieved:
+        print(f'[{similarity:.2f}] {chunk}')
+    instruction_prompt = "\n\nBased on the above facts and above facts alone, answer the following question:\n"
+    instruction_prompt += '\n'.join([chunk for chunk, similarity in retrieved])
 
-stream = ollama.chat(
-    model = LANGUAGE_MODEL,
-    messages = [
-        {'role':'user', 'content': input_query},
-        {'role':'assistant', 'content': instruction_prompt}
-    ],
-    stream = True,
-)
+    stream = ollama.chat(
+        model = LANGUAGE_MODEL,
+        messages = [
+            {'role':'user', 'content': input_query},
+            {'role':'assistant', 'content': instruction_prompt}
+        ],
+        stream = True,
+    )
 
-#print response in real-time
-print('Response:')
-for chunk in stream:
-    print(chunk['message']['content'], end='', flush=True)
+    # Print response in real-time
+    print('Response:')
+    for chunk in stream:
+        print(chunk['message']['content'], end='', flush=True)
+    print('----------------\n')
+    st=int(input('\nPress 1 to ask another question or 0 to exit...\n'))
